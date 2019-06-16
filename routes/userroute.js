@@ -1,9 +1,16 @@
 const User = require('../Model/user'); //path for user.js in the model
 const multer = require('multer');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 const path = require('path');
 const express = require("express");
-
+var jwt = require('jsonwebtoken');
+var bcrypt = require('bcrypt');
+var app = express();
+app.use(express.json());
+app.use(cors());
 const router = express.Router();
+app.use(bodyParser.urlencoded({ extended: false }));
 
 
 router.route('/registration')
@@ -17,6 +24,146 @@ router.route('/registration')
             response.send(e);
         })
     });
+
+router.post('/authenticate', function(req, res) {
+    var response = res;
+    console.log(req.body);
+    // find the user
+    User.findOne({
+        email: req.body.email
+    }, function(err, user) {
+
+        if (err) throw err;
+
+        if (!user) {
+            res.json({ Success: false, message: 'Authentication failed. User not found.' });
+        } else if (user) {
+
+            if (user.user_status == "Banned") {
+                res.json({ Success: false, message: "You are Banned by Admin" }); // send response to ajax call to view
+            } else {
+
+                bcrypt.compare(req.body.password, user.password, function(err, res) {
+                    if (res) {
+                        // Passwords match
+
+                        // if user is found and password is right
+                        // create a token
+                        var payload = {
+                            admin: user.admin
+                        }
+                        var token = jwt.sign(payload, "secretmessage", {
+                            expiresIn: 86400 // expires in 24 hours
+                        });
+
+                        response.json({
+                            Success: 'Success!',
+                            message: 'Welcome ' + user.username,
+                            token: token,
+                            username: user.username,
+                            _id: user._id,
+                            admin: user.admin
+                        });
+
+                    } else {
+                        // Passwords don't match
+                        response.json("Authentication failed. Wrong password.");
+                    }
+                });
+            }
+
+        }
+
+    });
+});
+router.post('/signup', function(req, res, next) {
+    console.log(req.body);
+    var personInfo = req.body;
+
+    // Validate if the user enter email, username, password and confirm password
+    if (!personInfo.name || !personInfo.email || !personInfo.username || !personInfo.password || !personInfo.passwordConf) {
+        res.json({ "Success": "Fill all the input fields" });
+    } else {
+        // validate if the password and confirm password is same or not
+        if (personInfo.password == personInfo.passwordConf) {
+
+            // find the email if the email in table
+            User.findOne({ email: personInfo.email }, function(err, data) {
+
+                // if the email is not already taken
+                if (!data) {
+                    var c;
+                    // find the last user and take unique_id from that to variable c for new user
+                    User.findOne({}, function(err, data) {
+
+                        var hashpassword = bcrypt.hashSync(personInfo.password, 10);
+                        //Initialize the user Model object with variable or value from the post form
+                        var newPerson = new User({
+                            name: personInfo.name,
+                            email: personInfo.email,
+                            username: personInfo.username,
+                            password: hashpassword,
+                            passwordConf: hashpassword,
+
+                            admin: false
+                        });
+
+                        // Save it to table User
+                        newPerson.save(function(err, Person) {
+                            if (err)
+                                console.log(err);
+                            else
+                                console.log('Success');
+                        });
+
+                    }).sort({ _id: -1 }).limit(1);
+                    res.json("You are regestered,You can login now."); // send response to ajax call to view
+                } else {
+                    res.json({ "Success": "Email is already used." }); // send response to ajax call to view
+                }
+
+            });
+        } else {
+            res.send({ "Success": "password is not matched" }); // send response to ajax call to view
+        }
+    }
+});
+// ---------------------------------------------------------
+// route middleware to authenticate and check token
+// ---------------------------------------------------------
+
+
+// router.use(function(req, res, next) {
+
+//     // check header or url parameters or post parameters for token
+//     var token = req.body.token || req.param('token') || req.headers['x-access-token'];
+
+//     // decode token
+//     if (token) {
+
+//         // verifies secret and checks exp
+//         jwt.verify(token, "secretmessage", function(err, decoded) {
+//             if (err) {
+//                 return res.json({ success: false, message: 'Failed to authenticate token.' });
+//             } else {
+//                 // if everything is good, save to request for use in other routes
+//                 req.decoded = decoded;
+//                 next();
+//             }
+//         });
+
+//     } else {
+
+//         // if there is no token
+//         // return an error
+//         return res.status(403).send({
+//             success: false,
+//             message: 'No token provided.'
+//         });
+
+//     }
+
+// });
 
 router.route('/login').post((req, response) => {
     console.log(req.body);
@@ -34,36 +181,15 @@ router.route('/login').post((req, response) => {
         }
     })
 });
-// app.post('/upload', upload.single('imageName'), (req, res) => {
-//     res.json(req.file.filename)
-// })
-
-
-var storage = multer.diskStorage({
-    destination: "images",
-    filename: function(req, file, callback) {
-        const ext = path.extname(file.originalname);
-        callback(null, "bikal" + Date.now() + ext);
-    }
-
+router.post('/edtProfile', (req, res) => {
+    User.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
+        if (!err) {
+            res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.username });
+        } else {
+            console.log('Error during record update : ' + err);
+        }
+    });
 });
-var imageFileFilter = (req, file, cb) => {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) { return cb(newError("You can upload only image files!"), false); }
-    cb(null, true);
-};
-
-var upload = multer({
-    storage: storage,
-    fileFilter: imageFileFilter,
-    limits: {
-        fileSize: 1000000
-    }
-});
-
-
-router.route('/uploadimage', upload.single('imageName')).post((req, response) => {
-    res.json(req.file.filename)
-})
 
 
 module.exports = router;

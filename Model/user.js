@@ -1,20 +1,15 @@
-const moongose = require('mongoose');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
-const User = moongose.model('User', {
-
-    fullName: {
-        type: String
-    },
-    email: {
-        type: String
-
-    },
-    password: {
-        type: String
-    },
-    image: {
-        type: String
-    }
-
-})
-module.exports = User;
+// set up a mongoose model
+module.exports = mongoose.model('User', new Schema({
+    unique_id: Number,
+    name: String,
+    email: String,
+    phone: String,
+    username: String,
+    password: String,
+    passwordConf: String,
+    user_status: String,
+    admin: Boolean,
+}));
