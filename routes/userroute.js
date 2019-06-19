@@ -13,19 +13,7 @@ const router = express.Router();
 app.use(bodyParser.urlencoded({ extended: false }));
 
 
-router.route('/registration')
-    .post((req, response) => {
-        console.log(req.body); // shows the parameters that the user sends from body 
-        var mydata = new User(req.body); //sends the req from client to our model user
-        mydata.save().then(function() { //mydata.save initialies the data sending process though the model
-            response.json(mydata); //client gets the response
-
-        }).catch(function(e) { //if data is not saved catch triggers the reason why
-            response.send(e);
-        })
-    });
-
-router.post('/authenticate', function(req, res) {
+router.post('/login', function(req, res) {
     var response = res;
     console.log(req.body);
     // find the user
@@ -45,10 +33,6 @@ router.post('/authenticate', function(req, res) {
 
                 bcrypt.compare(req.body.password, user.password, function(err, res) {
                     if (res) {
-                        // Passwords match
-
-                        // if user is found and password is right
-                        // create a token
                         var payload = {
                             admin: user.admin
                         }
@@ -66,7 +50,7 @@ router.post('/authenticate', function(req, res) {
                         });
 
                     } else {
-                        // Passwords don't match
+
                         response.json("Authentication failed. Wrong password.");
                     }
                 });
@@ -76,7 +60,7 @@ router.post('/authenticate', function(req, res) {
 
     });
 });
-router.post('/signup', function(req, res, next) {
+router.post('/registration', function(req, res, next) {
     console.log(req.body);
     var personInfo = req.body;
 
@@ -124,64 +108,44 @@ router.post('/signup', function(req, res, next) {
 
             });
         } else {
-            res.send({ "Success": "password is not matched" }); // send response to ajax call to view
+            res.json({ "Success": "password is not matched" }); // send response to ajax call to view
         }
     }
 });
-// ---------------------------------------------------------
-// route middleware to authenticate and check token
-// ---------------------------------------------------------
 
+router.use(function(req, res, next) {
 
-// router.use(function(req, res, next) {
+    // check header or url parameters or post parameters for token
+    var token = req.body.token || req.param('token') || req.headers['x-access-token'];
 
-//     // check header or url parameters or post parameters for token
-//     var token = req.body.token || req.param('token') || req.headers['x-access-token'];
+    // decode token
+    if (token) {
 
-//     // decode token
-//     if (token) {
+        // verifies secret and checks exp
+        jwt.verify(token, "secretmessage", function(err, decoded) {
+            if (err) {
+                return res.json({ success: false, message: 'Failed to authenticate token.' });
+            } else {
+                // if everything is good, save to request for use in other routes
+                req.decoded = decoded;
+                next();
+            }
+        });
 
-//         // verifies secret and checks exp
-//         jwt.verify(token, "secretmessage", function(err, decoded) {
-//             if (err) {
-//                 return res.json({ success: false, message: 'Failed to authenticate token.' });
-//             } else {
-//                 // if everything is good, save to request for use in other routes
-//                 req.decoded = decoded;
-//                 next();
-//             }
-//         });
+    } else {
 
-//     } else {
+        // if there is no token
+        // return an error
+        return res.status(403).send({
+            success: false,
+            message: 'No token provided.'
+        });
 
-//         // if there is no token
-//         // return an error
-//         return res.status(403).send({
-//             success: false,
-//             message: 'No token provided.'
-//         });
+    }
 
-//     }
-
-// });
-
-router.route('/login').post((req, response) => {
-    console.log(req.body);
-    var email = req.body.email;
-    var password = req.body.password;
-
-    User.findOne({ 'email': email, 'password': password }).count(function(err, number) {
-        if (number != 0) {
-            response.statusCode = 200;
-            response.setHeader('Content-Type', 'application/json') //what format the response is being sent in
-            response.json('Successfully Logged in');
-        } else {
-            response.json('email and password did not match');
-            console.log('email and password did not match')
-        }
-    })
 });
-router.post('/edtProfile', (req, res) => {
+
+router.post('/updateprofile', (req, res) => {
     User.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
         if (!err) {
             res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.username });
@@ -191,5 +155,23 @@ router.post('/edtProfile', (req, res) => {
     });
 });
 
+router.get('/profile/:_id', (req, res) => {
+    User.findById({
+        _id: req.params._id
+    }, function(err, user) {
+        if (err) {
+            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!1' });
+        } else if (!user) {
+            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!2' });
+        } else if (user) {
 
+            if (user.username == req.body.username) {
+                res.json(user);
+            } else {
+                res.json({ 'Success': 'Authentication Failed!!' });
+            }
+        }
+
+    });
+});
 module.exports = router;

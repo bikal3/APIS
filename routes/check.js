@@ -11,7 +11,7 @@ var jwt = require('jsonwebtoken');
 // ---------------------------------------------------------
 // authentication (no middleware necessary since this isnt authenticated)
 // ---------------------------------------------------------
-// http://localhost:5000/api/authenticate
+// http://localhost:3000/authenticate
 apiRoutes.post('/authenticate', function(req, res) {
 
     // find the user
