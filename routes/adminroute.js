@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../Model/user');
-// var jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var app = express();
 
@@ -61,11 +61,11 @@ router.post('/admin/add_user', (req, res) => {
     user.password = hashpassword;
     user.passwordConf = hashpassword;
     user.user_status = req.body.user_status;
-    // if (req.body.user_type == "Admin") {
-    //     user.admin = true;
-    // } else {
-    //     user.admin = false;
-    // }
+    if (req.body.user_type == "Admin") {
+        user.admin = true;
+    } else {
+        user.admin = false;
+    }
 
     user.save(function(err, Person) {
         if (err) {

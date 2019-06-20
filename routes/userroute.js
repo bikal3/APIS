@@ -16,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 router.post('/login', function(req, res) {
     var response = res;
     console.log(req.body);
+    console.log(req.token);
     // find the user
     User.findOne({
         email: req.body.email
@@ -99,7 +100,6 @@ router.post('/registration', function(req, res, next) {
                             else
                                 console.log('Success');
                         });
-
                     }).sort({ _id: -1 }).limit(1);
                     res.json("You are regestered,You can login now."); // send response to ajax call to view
                 } else {

@@ -6,6 +6,7 @@ require('./Database/connection');
 const userRouter = require('./routes/userroute');
 const imageRouter = require('./routes/imageadd');
 const adminRouter = require('./routes/adminroute');
+const contactRouter = require('./routes/contactroute');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
@@ -18,6 +19,7 @@ app.get("/", function(req, res) {
 app.use(userRouter);
 app.use(imageRouter);
 app.use(adminRouter);
+app.use(contactRouter);
 
 
 // listen to port for incoming requests
