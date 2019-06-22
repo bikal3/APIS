@@ -52,7 +52,7 @@ router.use(function(req, res, next) {
 
 
 
-router.post('/admin/add_user', (req, res) => {
+router.post('/add_user', (req, res) => {
     var hashpassword = bcrypt.hashSync(req.body.password, 10);
     var user = new User();
     user.name = req.body.name;
@@ -79,29 +79,31 @@ router.post('/admin/add_user', (req, res) => {
 });
 
 
-router.post('/admin/userlist', function(req, res, next) {
-    User.find((err, docs) => {
-        if (!err) {
-            res.render("userList", { // Displaying view of list.hbs file containing HTML File
-                users: docs, // Sending all user to view
-                layout: ""
-            });
-        } else {
-            res.json({ 'Success': 'Failed to Retreive!!!' });
-        }
-    }).sort({ '_id': -1 });
-});
 
-router.post('/admin/userdelete', (req, res) => {
-    User.findByIdAndRemove(req.body._id, (err, doc) => {
-        if (!err) {
-            res.json({ 'Success': 'User Deleted Successfully!!' });
-        } else {
-            res.json({ 'Success': 'Error in Appointment delete :' + err });
-        }
-    });
+router.post('/userlist', (req, response, next) => {
+    console.log(req.body);
+    User.find().then(docs => {
+
+        response.status(200).json(docs);
+    }).catch(err => {
+        console.log(err);
+        response.status(500).json({ error: err });
+    })
 });
 
 
-
+router.post('/userdelete/:_id', (req, res) => {
+    User.findByIdAndRemove(req.params._id).then(result => {
+            console.log(result);
+            res.status(201).json({
+                message: "Delete Succefully"
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                message: err
+            })
+        })
+});
 module.exports = router;

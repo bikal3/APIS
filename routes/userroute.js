@@ -1,14 +1,10 @@
-const User = require('../Model/user'); //path for user.js in the model
-const multer = require('multer');
-const cors = require('cors');
+var User = require('../Model/user'); //path for user.js in the model
 const bodyParser = require('body-parser');
-const path = require('path');
 const express = require("express");
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var app = express();
 app.use(express.json());
-app.use(cors());
 const router = express.Router();
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -145,7 +141,7 @@ router.use(function(req, res, next) {
 
 });
 
-router.post('/updateprofile', (req, res) => {
+router.put('/updateprofile', (req, res) => {
     User.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
         if (!err) {
             res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.username });
@@ -164,12 +160,12 @@ router.get('/profile/:_id', (req, res) => {
         } else if (!user) {
             res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!2' });
         } else if (user) {
-
-            if (user.username == req.body.username) {
-                res.json(user);
-            } else {
-                res.json({ 'Success': 'Authentication Failed!!' });
-            }
+            res.json(user);
+            // if (user.username == req.body.username) {
+            //     res.json(user);
+            // } else {
+            //     res.json({ 'Success': 'Authentication Failed!!' });
+            // }
         }
 
     });
