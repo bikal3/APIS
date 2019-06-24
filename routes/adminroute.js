@@ -52,7 +52,7 @@ router.use(function(req, res, next) {
 
 
 
-router.post('/add_user', (req, res) => {
+router.post('/adduser', (req, res) => {
     var hashpassword = bcrypt.hashSync(req.body.password, 10);
     var user = new User();
     user.name = req.body.name;
@@ -90,10 +90,39 @@ router.post('/userlist', (req, response, next) => {
         response.status(500).json({ error: err });
     })
 });
+router.post('/useredit', (req, res) => {
+    User.findById(req.body._id, (err, doc) => {
+        if (!err) {
+            res.json(doc);
+        }
+    });
+});
+router.post('/userupdate', (req, res) => {
+    // var all_data = req.body;
+    // all_data.password = bcrypt.hashSync(all_data.password, 10);
+    User.findOneAndUpdate({ _id: req.body._id }, (err, doc) => { //find by id and update it
+        if (!err) {
+            res.json({ 'Success': 'User Edited Successfully!!' });
+        } else {
+            res.json({ 'Success': 'Error during record update : ' + err });
+        }
+    });
+});
+router.post('/updateprofile', (req, res) => {
+    var all_data = req.body;
+    all_data.password = bcrypt.hashSync(all_data.password, 10);
+    all_data.passwordConf = bcrypt.hashSync(all_data.password, 10);
+    User.findOneAndUpdate({ _id: req.body._id }, all_data, { new: true }, (err, doc) => {
+        if (!err) {
+            res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.all_data });
+        } else {
+            console.log('Error during record update : ' + err);
+        }
+    });
+});
 
-
-router.post('/userdelete/:_id', (req, res) => {
-    User.findByIdAndRemove(req.params._id).then(result => {
+router.post('/userdelete', (req, res) => {
+    User.findByIdAndRemove(req.body._id).then(result => {
             console.log(result);
             res.status(201).json({
                 message: "Delete Succefully"
