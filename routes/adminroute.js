@@ -1,12 +1,12 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../Model/user');
+var Contact = require('../Model/contact');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var app = express();
 
-
-
+// ====================================Middleware of admin=======================================//
 router.use(function(req, res, next) {
 
     // check header or url parameters or post parameters for token
@@ -51,7 +51,7 @@ router.use(function(req, res, next) {
 });
 
 
-
+// ====================================Add User=======================================//
 router.post('/adduser', (req, res) => {
     var hashpassword = bcrypt.hashSync(req.body.password, 10);
     var user = new User();
@@ -79,7 +79,7 @@ router.post('/adduser', (req, res) => {
 });
 
 
-
+// ====================================User List=======================================//
 router.post('/userlist', (req, response, next) => {
     console.log(req.body);
     User.find().then(docs => {
@@ -97,30 +97,19 @@ router.post('/useredit', (req, res) => {
         }
     });
 });
-router.post('/userupdate', (req, res) => {
-    // var all_data = req.body;
-    // all_data.password = bcrypt.hashSync(all_data.password, 10);
-    User.findOneAndUpdate({ _id: req.body._id }, (err, doc) => { //find by id and update it
+// ====================================Update User=======================================//
+router.put('/userupdate', (req, res) => {
+    User.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
         if (!err) {
-            res.json({ 'Success': 'User Edited Successfully!!' });
-        } else {
-            res.json({ 'Success': 'Error during record update : ' + err });
-        }
-    });
-});
-router.post('/updateprofile', (req, res) => {
-    var all_data = req.body;
-    all_data.password = bcrypt.hashSync(all_data.password, 10);
-    all_data.passwordConf = bcrypt.hashSync(all_data.password, 10);
-    User.findOneAndUpdate({ _id: req.body._id }, all_data, { new: true }, (err, doc) => {
-        if (!err) {
-            res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.all_data });
+            res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.username });
         } else {
             console.log('Error during record update : ' + err);
         }
     });
 });
 
+
+//=====================================Delete User=========================================// 
 router.post('/userdelete', (req, res) => {
     User.findByIdAndRemove(req.body._id).then(result => {
             console.log(result);
@@ -135,4 +124,34 @@ router.post('/userdelete', (req, res) => {
             })
         })
 });
+
+
+//======================================Contact List========================================//
+router.post('/contactlist', (req, response, next) => {
+    console.log(req.body);
+    Contact.find().then(docs => {
+
+        response.status(200).json(docs);
+    }).catch(err => {
+        console.log(err);
+        response.status(500).json({ error: err });
+    })
+});
+
+//=====================================Delete Contact=========================================// 
+router.post('/contactdelete', (req, res) => {
+    Contact.findByIdAndRemove(req.body._id).then(result => {
+            console.log(result);
+            res.status(201).json({
+                message: "Delete Succefully"
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                message: err
+            })
+        })
+});
+
 module.exports = router;
