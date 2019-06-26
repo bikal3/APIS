@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var User = require('../Model/user');
 var Contact = require('../Model/contact');
+var Post = require('../Model/post');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var app = express();
@@ -90,6 +91,8 @@ router.post('/userlist', (req, response, next) => {
         response.status(500).json({ error: err });
     })
 });
+
+//========================================User Edit=======================================//
 router.post('/useredit', (req, res) => {
     User.findById(req.body._id, (err, doc) => {
         if (!err) {
@@ -153,5 +156,53 @@ router.post('/contactdelete', (req, res) => {
             })
         })
 });
+//======================================Post List========================================//
+router.post('/postlist', (req, response, next) => {
+    console.log(req.body);
+    Post.find().then(docs => {
+
+        response.status(200).json(docs);
+    }).catch(err => {
+        console.log(err);
+        response.status(500).json({ error: err });
+    })
+});
+//========================================Post Edit=======================================//
+router.post('/postedit', (req, res) => {
+    Post.findById(req.body._id, (err, doc) => {
+        if (!err) {
+            res.json(doc);
+        }
+    });
+});
+
+//=====================================Delete Post=========================================// 
+router.post('/postdelete', (req, res) => {
+    Post.findByIdAndRemove(req.body._id).then(result => {
+            console.log(result);
+            res.status(201).json({
+                message: "Delete Succefully"
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                message: err
+            })
+        })
+});
+// ====================================Update post=======================================//
+router.put('/postupdate', (req, res) => {
+    Post.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
+        if (!err) {
+            res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.username });
+        } else {
+            console.log('Error during record update : ' + err);
+        }
+    });
+});
+
+
+
 
 module.exports = router;

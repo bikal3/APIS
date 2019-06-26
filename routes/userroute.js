@@ -1,4 +1,5 @@
 var User = require('../Model/user'); //path for user.js in the model
+var Post = require('../Model/post'); //path for user.js in the model
 const bodyParser = require('body-parser');
 const express = require("express");
 var jwt = require('jsonwebtoken');
@@ -170,4 +171,40 @@ router.get('/profile/:_id', (req, res) => {
 
     });
 });
+router.post('/post', (req, res) => {
+    User.findOne({
+        _id: req.body._id
+    }, function(err, user) {
+        if (err) {
+            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!' });
+        } else if (!user) {
+            res.json({ 'Success': 'Not user' });
+        } else if (user) {
+            console.log(user.username);
+            console.log(req.body.username);
+            if (user.username == req.body.username) {
+                var post = new Post();
+
+                post.title = req.body.title;
+                post.location = req.body.location;
+                post.image = req.body.image;
+                post.description = req.body.description;
+                post.user = req.body.username;
+                post.save((err, doc) => {
+                    if (err) {
+                        console.log('Error during record insertion : ' + err);
+                    } else {
+                        res.json({ 'Success': 'Post successfully Placed!!!' });
+                    }
+                });
+                console.log(post);
+            } else {
+                res.json({ 'Success': 'Authentication Failed!!' });
+            }
+        }
+
+    });
+
+});
+
 module.exports = router;
