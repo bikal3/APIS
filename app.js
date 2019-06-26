@@ -11,6 +11,8 @@ const contactRouter = require('./routes/contactroute');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(express.static("./images"));
+
 // app.use(cors);
 
 app.get("/", function(req, res) {

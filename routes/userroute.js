@@ -207,4 +207,15 @@ router.post('/post', (req, res) => {
 
 });
 
+//======================================Post List========================================//
+router.post('/postlist', (req, response, next) => {
+    console.log(req.body);
+    Post.find().then(docs => {
+
+        response.status(200).json(docs);
+    }).catch(err => {
+        console.log(err);
+        response.status(500).json({ error: err });
+    })
+});
 module.exports = router;
