@@ -219,7 +219,7 @@ router.post('/postlist', (req, response, next) => {
         response.status(500).json({ error: err });
     })
 });
-module.exports = router;
+
 
 //======================================Post Comment========================================//
 
@@ -255,3 +255,4 @@ router.post('/comment', (req, res) => {
     });
 
 });
+module.exports = router;

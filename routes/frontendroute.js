@@ -25,5 +25,39 @@ router.post('/contact', (req, res) => {
     });
 });
 
+router.post('/postDetail/:id', (req, res) => {
+    var locals = {};
+    async.parallel([
+        //Load user Data
+        function(callback) {
+            Post.findById(req.params.id, function(err, post) {
+                if (err) return callback(err);
+                locals.post = post;
+                callback();
+            });
+        },
+        //Load posts Data
+        function(callback) {
+            Comment.find({ post_id: req.params.id }, function(err, comments) {
+                if (err) return callback(err);
+                locals.comments = comments;
+                console.log(comments);
+                callback();
+            }).sort({ '_id': -1 });
+        }
+    ], function(err) {
+        if (err) return ("asds");
+        res.json({
+            post: locals.post,
+            comments: locals.comments
+
+        });
+    });
+
+    console.log(locals.comments);
+
+});
+
+
 
 module.exports = router;
