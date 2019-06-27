@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var Contact = require('../Model/contact');
-var Feedback = require('../Model/feedback');
-
+var Post = require('../Model/post');
+var Comment = require('../Model/comment');
+var async = require("async");
 
 router.post('/contact', (req, res) => {
     // res.header("allow-file-access-from-files", "*");

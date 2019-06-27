@@ -7,7 +7,7 @@ require('./Database/connection');
 const userRouter = require('./routes/userroute');
 const imageRouter = require('./routes/imageadd');
 const adminRouter = require('./routes/adminroute');
-const contactRouter = require('./routes/contactroute');
+const frontendtRouter = require('./routes/frontendroute');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
@@ -28,7 +28,7 @@ var corsOptions = {
 app.use('/api/users', cors(corsOptions), userRouter);
 app.use('/api', cors(corsOptions), imageRouter);
 app.use('/api/admin', cors(corsOptions), adminRouter);
-app.use('/api', cors(corsOptions), contactRouter);
+app.use('/api', cors(corsOptions), frontendtRouter);
 
 // app.use(userRouter);
 // app.use(imageRouter);

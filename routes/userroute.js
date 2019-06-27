@@ -1,5 +1,6 @@
 var User = require('../Model/user'); //path for user.js in the model
 var Post = require('../Model/post'); //path for user.js in the model
+var Comment = require('../Model/comment');
 const bodyParser = require('body-parser');
 const express = require("express");
 var jwt = require('jsonwebtoken');
@@ -219,3 +220,38 @@ router.post('/postlist', (req, response, next) => {
     })
 });
 module.exports = router;
+
+//======================================Post Comment========================================//
+
+router.post('/comment', (req, res) => {
+    User.findOne({
+        _id: req.body._id
+    }, function(err, user) {
+        if (err) {
+            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!1' });
+        } else if (!user) {
+            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!2' });
+        } else if (user) {
+            if (user.username == req.body.username) {
+                var comment = new Comment();
+
+                comment.post_id = req.body.post_id;
+                comment.comment = req.body.comment;
+                comment.user = req.body.username;
+
+
+                comment.save((err, doc) => {
+                    if (err) {
+                        console.log('Error during record insertion : ' + err);
+                    } else {
+                        res.json({ 'Success': 'Your comment successfully posted' });
+                    }
+                });
+            } else {
+                res.json({ 'Success': ' Failed!!' });
+            }
+        }
+
+    });
+
+});
