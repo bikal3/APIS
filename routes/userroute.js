@@ -143,24 +143,22 @@ router.use(function(req, res, next) {
 
 });
 
-router.put('/updateprofile', (req, res) => {
-    User.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
-        if (!err) {
-            res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.username });
-        } else {
-            console.log('Error during record update : ' + err);
-        }
-    });
+router.put('/userupdate', function(req, res, next) {
+    console.log(req.body);
+    User.findByIdAndUpdate({ _id: req.body.id }, req.body).then(function(user) {
+        console.log(user)
+        res.json(user)
+    })
 });
 
-router.get('/profile/:_id', (req, res) => {
+router.post('/profile', (req, res) => {
     User.findById({
-        _id: req.params._id
+        _id: req.body._id
     }, function(err, user) {
         if (err) {
             res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!1' });
         } else if (!user) {
-            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!2' });
+            res.json('User not found ');
         } else if (user) {
             res.json(user);
             // if (user.username == req.body.username) {
@@ -172,6 +170,9 @@ router.get('/profile/:_id', (req, res) => {
 
     });
 });
+
+
+
 router.post('/post', (req, res) => {
     User.findOne({
         _id: req.body._id
@@ -232,12 +233,12 @@ router.post('/comment', (req, res) => {
         } else if (!user) {
             res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!2' });
         } else if (user) {
-            if (user.username == req.body.username) {
+            if (user._id == req.body.user) {
                 var comment = new Comment();
 
                 comment.post_id = req.body.post_id;
                 comment.comment = req.body.comment;
-                comment.user = req.body.username;
+                comment.user = req.body.user;
 
 
                 comment.save((err, doc) => {

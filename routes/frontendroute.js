@@ -3,6 +3,7 @@ var router = express.Router();
 var Contact = require('../Model/contact');
 var Post = require('../Model/post');
 var Comment = require('../Model/comment');
+var User = require('../Model/user');
 var async = require("async");
 
 router.post('/contact', (req, res) => {
@@ -39,9 +40,10 @@ router.post('/postDetail/:id', (req, res) => {
         //Load posts Data
         function(callback) {
             Comment.find({ post_id: req.params.id }, function(err, comments) {
+
                 if (err) return callback(err);
                 locals.comments = comments;
-                console.log(comments);
+                // console.log(comments);
                 callback();
             }).sort({ '_id': -1 });
         }
@@ -54,10 +56,8 @@ router.post('/postDetail/:id', (req, res) => {
         });
     });
 
-    console.log(locals.comments);
+    // console.log(locals.comments);
 
 });
-
-
 
 module.exports = router;
