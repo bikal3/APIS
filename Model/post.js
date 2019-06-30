@@ -7,7 +7,10 @@ feedbackSchema = new Schema({
     location: String,
     image: String,
     description: String,
-    user: String,
+    user: {
+        type: Schema.ObjectId,
+        ref: 'User'
+    }
 });
 Post = mongoose.model('Post', feedbackSchema);
 

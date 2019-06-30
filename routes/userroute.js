@@ -145,9 +145,9 @@ router.use(function(req, res, next) {
 
 router.put('/userupdate', function(req, res, next) {
     console.log(req.body);
-    User.findByIdAndUpdate({ _id: req.body.id }, req.body).then(function(user) {
+    User.findByIdAndUpdate({ _id: req.body._id }, req.body).then(function(user) {
         console.log(user)
-        res.json(user)
+        res.json("Successfully update")
     })
 });
 
@@ -184,14 +184,14 @@ router.post('/post', (req, res) => {
         } else if (user) {
             console.log(user.username);
             console.log(req.body.username);
-            if (user.username == req.body.username) {
+            if (user._id == req.body.user) {
                 var post = new Post();
 
                 post.title = req.body.title;
                 post.location = req.body.location;
                 post.image = req.body.image;
                 post.description = req.body.description;
-                post.user = req.body.username;
+                post.user = req.body.user;
                 post.save((err, doc) => {
                     if (err) {
                         console.log('Error during record insertion : ' + err);
