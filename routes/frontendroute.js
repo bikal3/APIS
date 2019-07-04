@@ -21,15 +21,14 @@ router.post('/contact', (req, res) => {
         if (err) {
             res.send({ 'Success': 'Something is wrong' });
         } else {
-            res.send({ "Success": 'Your feedback successfully send. We will call you soon' });
+            res.json('Your feedback successfully send');
         }
     });
 });
 
-// router.post('/postDetail/:id', (req, res) => {
+// router.get('/postDetail/:id', (req, res) => {
 //     var locals = {};
 //     async.parallel([
-//         //Load user Data
 //         function(callback) {
 //             Post.findById(req.params.id, function(err, post) {
 //                 if (err) return callback(err);
@@ -37,37 +36,30 @@ router.post('/contact', (req, res) => {
 //                 callback();
 //             });
 //         },
-//         //Load posts Data
 //         function(callback) {
-//             Comment.find({ post_id: req.params.id }).populate('user').sort({ '_id': -1 }).exec(function(err, comments) {
-
-//                 console.log(comments.comment);
-
+//             Comment.find({ post_id: req.params.id }, function(err, comments) {
 //                 if (err) return callback(err);
 //                 locals.comments = comments;
-//                 // console.log(comments);
+//                 console.log(comments);
 //                 callback();
 //             }).sort({ '_id': -1 });
 //         }
-
 //     ], function(err) {
-//         if (err) return ("asds");
+//         if (err) return next(err);
+
 //         res.json({
 //             post: locals.post,
 //             comments: locals.comments,
-//             user: locals.user
-
 //         });
 //     });
-
-//     console.log(locals.user);
+//     console.log(locals.comments);
 
 // });
+
 
 router.post('/postDetail/:id', (req, res) => {
     var locals = {};
     async.parallel([
-        //Load user Data
         function(callback) {
             Post.findById(req.params.id).populate('user').sort({ '_id': -1 }).exec(function(err, post) {
                 if (err) return callback(err);
@@ -75,7 +67,6 @@ router.post('/postDetail/:id', (req, res) => {
                 callback();
             });
         },
-        //Load posts Data
         function(callback) {
             Comment.find({ post_id: req.params.id }).populate('user').sort({ '_id': -1 }).exec(function(err, comments) {
 
@@ -83,7 +74,7 @@ router.post('/postDetail/:id', (req, res) => {
 
                 if (err) return callback(err);
                 locals.comments = comments;
-                // console.log(comments);
+
                 callback();
             });
         }
@@ -96,7 +87,30 @@ router.post('/postDetail/:id', (req, res) => {
         });
     });
 
-    // console.log(locals.comments);
+    console.log(locals.comments);
 
 });
+
+router.post('/postbyid/:id', (req, response, next) => {
+    console.log(req.body);
+    Post.findById(req.params.id).then(docs => {
+
+        response.status(200).json(docs);
+    }).catch(err => {
+        console.log(err);
+        response.status(500).json({ error: err });
+    })
+});
+router.post('/userbyid/:id', (req, response, next) => {
+    console.log(req.body);
+    User.findById(req.params.id).then(docs => {
+
+        response.status(200).json(docs);
+    }).catch(err => {
+        console.log(err);
+        response.status(500).json({ error: err });
+    })
+});
+
+
 module.exports = router;
