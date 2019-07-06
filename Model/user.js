@@ -13,8 +13,10 @@ module.exports = mongoose.model('User', new Schema({
     passwordConf: String,
     user_status: String,
     admin: Boolean,
+    desc: String,
     image: {
         type: String,
         default: "user.png",
     },
+
 }));

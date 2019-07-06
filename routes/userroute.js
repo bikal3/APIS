@@ -26,34 +26,30 @@ router.post('/login', function(req, res) {
             res.json({ Success: false, message: 'Authentication failed. User not found.' });
         } else if (user) {
 
-            if (user.user_status == "Banned") {
-                res.json({ Success: false, message: "You are Banned by Admin" }); // send response to ajax call to view
-            } else {
-
-                bcrypt.compare(req.body.password, user.password, function(err, res) {
-                    if (res) {
-                        var payload = {
-                            admin: user.admin
-                        }
-                        var token = jwt.sign(payload, "secretmessage", {
-                            expiresIn: 86400 // expires in 24 hours
-                        });
-
-                        response.json({
-                            Success: 'Success!',
-                            message: 'Welcome ' + user.username,
-                            token: token,
-                            username: user.username,
-                            _id: user._id,
-                            admin: user.admin
-                        });
-
-                    } else {
-
-                        response.json("Authentication failed. Wrong password.");
+            bcrypt.compare(req.body.password, user.password, function(err, res) {
+                if (res) {
+                    var payload = {
+                        admin: user.admin
                     }
-                });
-            }
+                    var token = jwt.sign(payload, "secretmessage", {
+                        expiresIn: 86400 // expires in 24 hours
+                    });
+
+                    response.json({
+                        Success: 'Success!',
+                        message: 'Welcome ' + user.username,
+                        token: token,
+                        username: user.username,
+                        _id: user._id,
+                        admin: user.admin
+                    });
+
+                } else {
+
+                    response.json("Authentication failed. Wrong password.");
+                }
+            });
+
 
         }
 
@@ -62,53 +58,48 @@ router.post('/login', function(req, res) {
 router.post('/registration', function(req, res, next) {
     console.log(req.body);
     var personInfo = req.body;
+    // validate if the password and confirm password is same or not
+    if (personInfo.password == personInfo.passwordConf) {
 
-    // Validate if the user enter email, username, password and confirm password
-    if (!personInfo.name || !personInfo.email || !personInfo.username || !personInfo.password || !personInfo.passwordConf) {
-        res.json({ "Success": "Fill all the input fields" });
+        // find the email if the email in table
+        User.findOne({ email: personInfo.email }, function(err, data) {
+
+            // if the email is not already taken
+            if (!data) {
+                var c;
+                // find the last user and take unique_id from that to variable c for new user
+                User.findOne({}, function(err, data) {
+
+                    var hashpassword = bcrypt.hashSync(personInfo.password, 10);
+                    //Initialize the user Model object with variable or value from the post form
+                    var newPerson = new User({
+                        name: personInfo.name,
+                        email: personInfo.email,
+                        username: personInfo.username,
+                        password: hashpassword,
+                        passwordConf: hashpassword,
+
+                        admin: false
+                    });
+
+                    // Save it to table User
+                    newPerson.save(function(err, Person) {
+                        if (err)
+                            console.log(err);
+                        else
+                            console.log('Success');
+                    });
+                }).sort({ _id: -1 }).limit(1);
+                res.json("You are regestered,You can login now."); // send response to ajax call to view
+            } else {
+                res.json({ "Success": "Email is already used." }); // send response to ajax call to view
+            }
+
+        });
     } else {
-        // validate if the password and confirm password is same or not
-        if (personInfo.password == personInfo.passwordConf) {
-
-            // find the email if the email in table
-            User.findOne({ email: personInfo.email }, function(err, data) {
-
-                // if the email is not already taken
-                if (!data) {
-                    var c;
-                    // find the last user and take unique_id from that to variable c for new user
-                    User.findOne({}, function(err, data) {
-
-                        var hashpassword = bcrypt.hashSync(personInfo.password, 10);
-                        //Initialize the user Model object with variable or value from the post form
-                        var newPerson = new User({
-                            name: personInfo.name,
-                            email: personInfo.email,
-                            username: personInfo.username,
-                            password: hashpassword,
-                            passwordConf: hashpassword,
-
-                            admin: false
-                        });
-
-                        // Save it to table User
-                        newPerson.save(function(err, Person) {
-                            if (err)
-                                console.log(err);
-                            else
-                                console.log('Success');
-                        });
-                    }).sort({ _id: -1 }).limit(1);
-                    res.json("You are regestered,You can login now."); // send response to ajax call to view
-                } else {
-                    res.json({ "Success": "Email is already used." }); // send response to ajax call to view
-                }
-
-            });
-        } else {
-            res.json({ "Success": "password is not matched" }); // send response to ajax call to view
-        }
+        res.json({ "Success": "password is not matched" }); // send response to ajax call to view
     }
+
 });
 
 router.use(function(req, res, next) {
@@ -161,13 +152,7 @@ router.post('/profile', (req, res) => {
             res.json('User not found ');
         } else if (user) {
             res.json(user);
-            // if (user.username == req.body.username) {
-            //     res.json(user);
-            // } else {
-            //     res.json({ 'Success': 'Authentication Failed!!' });
-            // }
         }
-
     });
 });
 
@@ -220,7 +205,29 @@ router.post('/postlist', (req, response, next) => {
         response.status(500).json({ error: err });
     })
 });
-
+router.get('/postbyid/:id', (req, response, next) => {
+    console.log(req.body);
+    Post.find({ user: req.params.id }).populate('user').sort({ '_id': -1 }).exec(function(err, docs) {
+        if (err) return callback(err);
+        response.json(docs);
+    })
+});
+//=====================================Delete Post=========================================// 
+router.post('/postdelete/:id', (req, res) => {
+    Post.findByIdAndRemove({ _id: req.params.id }).then(result => {
+            console.log(result);
+            res.status(201).json({
+                result
+                // message: "Delete Succefully"
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                message: err
+            })
+        })
+});
 
 //======================================Post Comment========================================//
 
@@ -245,7 +252,7 @@ router.post('/comment', (req, res) => {
                     if (err) {
                         console.log('Error during record insertion : ' + err);
                     } else {
-                        res.json({ 'Success': 'Your comment successfully posted' });
+                        res.json('Your comment successfully posted');
                     }
                 });
             } else {

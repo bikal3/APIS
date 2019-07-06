@@ -26,37 +26,6 @@ router.post('/contact', (req, res) => {
     });
 });
 
-// router.get('/postDetail/:id', (req, res) => {
-//     var locals = {};
-//     async.parallel([
-//         function(callback) {
-//             Post.findById(req.params.id, function(err, post) {
-//                 if (err) return callback(err);
-//                 locals.post = post;
-//                 callback();
-//             });
-//         },
-//         function(callback) {
-//             Comment.find({ post_id: req.params.id }, function(err, comments) {
-//                 if (err) return callback(err);
-//                 locals.comments = comments;
-//                 console.log(comments);
-//                 callback();
-//             }).sort({ '_id': -1 });
-//         }
-//     ], function(err) {
-//         if (err) return next(err);
-
-//         res.json({
-//             post: locals.post,
-//             comments: locals.comments,
-//         });
-//     });
-//     console.log(locals.comments);
-
-// });
-
-
 router.post('/postDetail/:id', (req, res) => {
     var locals = {};
     async.parallel([
@@ -111,6 +80,43 @@ router.post('/userbyid/:id', (req, response, next) => {
         response.status(500).json({ error: err });
     })
 });
+
+router.get('/commentbyid/:id', (req, response, next) => {
+    console.log(req.body);
+    Comment.find({ post_id: req.params.id }).then(docs => {
+
+        response.status(200).json(docs);
+    }).catch(err => {
+        console.log(err);
+        response.status(500).json({ error: err });
+    })
+});
+router.get('/ccommentbyid/:id', (req, response, next) => {
+    console.log(req.body);
+    Comment.find({ post_id: req.params.id }).populate('user').sort({ '_id': -1 }).exec(function(err, docs) {
+        if (err) return callback(err);
+        response.json(docs);
+    })
+});
+router.post('/profile', (req, res) => {
+    User.findById({
+        _id: req.body._id
+    }, function(err, user) {
+        if (err) {
+            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!1' });
+        } else if (!user) {
+            res.json('User not found ');
+        } else if (user) {
+            res.json(user);
+        }
+
+    });
+});
+
+
+
+
+
 
 
 module.exports = router;

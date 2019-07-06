@@ -128,7 +128,6 @@ router.post('/userdelete', (req, res) => {
         })
 });
 
-
 //======================================Contact List========================================//
 router.post('/contactlist', (req, response, next) => {
     console.log(req.body);
