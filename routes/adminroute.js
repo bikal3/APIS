@@ -50,6 +50,21 @@ router.use(function(req, res, next) {
     });
 
 });
+router.post('/profile', (req, res) => {
+    User.findById({
+        _id: req.body._id
+    }, function(err, user) {
+        if (err) {
+            res.json({ 'Success': 'Post Failed Something is wrong. Log in first!!1' });
+        } else if (!user) {
+            res.json('User not found ');
+        } else if (user) {
+            res.json(user);
+        }
+    });
+});
+
+
 
 
 // ====================================Add User=======================================//
@@ -155,18 +170,26 @@ router.post('/contactdelete', (req, res) => {
             })
         })
 });
+// //======================================Post List========================================//
+// router.post('/postlist', (req, response, next) => {
+//     console.log(req.body);
+//     Post.find().then(docs => {
+
+//         response.status(200).json(docs);
+//     }).catch(err => {
+//         console.log(err);
+//         response.status(500).json({ error: err });
+//     })
+// });
 //======================================Post List========================================//
 router.post('/postlist', (req, response, next) => {
-    console.log(req.body);
-    Post.find().then(docs => {
-
-        response.status(200).json(docs);
-    }).catch(err => {
-        console.log(err);
-        response.status(500).json({ error: err });
+        console.log(req.body);
+        Post.find().populate('user').sort({ '_id': -1 }).exec(function(err, docs) {
+            if (err) return callback(err);
+            response.json(docs);
+        })
     })
-});
-//========================================Post Edit=======================================//
+    //========================================Post Edit=======================================//
 router.post('/postedit', (req, res) => {
     Post.findById(req.body._id, (err, doc) => {
         if (!err) {

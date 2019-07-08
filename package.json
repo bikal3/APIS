@@ -1,24 +1,25 @@
 {
-  "name": "travelnepalapi",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Bikal Shrestha",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^3.0.6",
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.19.0",
-    "cors": "^2.8.5",
-    "express": "^4.16.4",
-    "jsonwebtoken": "^8.5.1",
-    "module": "^1.2.5",
-    "mongoose": "^5.5.12",
-    "multer": "^1.4.1",
-    "node-pre-gyp": "^0.13.0",
-    "nodemon": "^1.19.1"
-  }
+    "name": "travelnepalapi",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest"
+    },
+    "author": "Bikal Shrestha",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^3.0.6",
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^1.19.0",
+        "cors": "^2.8.5",
+        "express": "^4.16.4",
+        "jest": "^24.8.0",
+        "jsonwebtoken": "^8.5.1",
+        "module": "^1.2.5",
+        "mongoose": "^5.5.12",
+        "multer": "^1.4.1",
+        "node-pre-gyp": "^0.13.0",
+        "nodemon": "^1.19.1"
+    }
 }

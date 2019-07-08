@@ -193,7 +193,24 @@ router.post('/post', (req, res) => {
     });
 
 });
-
+//========================================Post Edit=======================================//
+router.post('/postedit', (req, res) => {
+    Post.findById(req.body._id, (err, doc) => {
+        if (!err) {
+            res.json(doc);
+        }
+    });
+});
+// ====================================Update post=======================================//
+router.put('/postupdate', (req, res) => {
+    Post.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
+        if (!err) {
+            res.json({ 'Success': 'Profile Updated Successfully!!', 'username': doc.username });
+        } else {
+            console.log('Error during record update : ' + err);
+        }
+    });
+});
 //======================================Post List========================================//
 router.post('/postlist', (req, response, next) => {
     console.log(req.body);
@@ -253,6 +270,7 @@ router.post('/comment', (req, res) => {
                         console.log('Error during record insertion : ' + err);
                     } else {
                         res.json('Your comment successfully posted');
+                        console.log(doc);
                     }
                 });
             } else {
